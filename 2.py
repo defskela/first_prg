@@ -70,7 +70,6 @@ player = None
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
-wall_group = pygame.sprite.Group()
 
 
 def generate_level(level):
@@ -112,10 +111,7 @@ tile_width = tile_height = 50
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
-        if tile_type == 'wall':
-            super().__init__(tiles_group, wall_group, all_sprites)
-        else:
-            super().__init__(tiles_group, all_sprites)
+        super().__init__(tiles_group, all_sprites)
         self.image = tile_images[tile_type]
         self.rect = self.image.get_rect().move(
             tile_width * pos_x, tile_height * pos_y)
@@ -130,31 +126,22 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = pos_y
 
     def render(self, top, bottom, left, right):
-        if pygame.sprite.spritecollideany(self, wall_group) is None:
-            if top:
-                self.rect.y -= 50
-            if not pygame.sprite.spritecollideany(self, wall_group) is None:
-                self.rect.y += 50
-            if bottom:
-                self.rect.y += 50
-            if not pygame.sprite.spritecollideany(self, wall_group) is None:
-                self.rect.y -= 50
-            if left:
-                self.rect.x -= 50
-            if not pygame.sprite.spritecollideany(self, wall_group) is None:
-                self.rect.x += 50
-            if right:
-                self.rect.x += 50
-            if not pygame.sprite.spritecollideany(self, wall_group) is None:
-                self.rect.x -= 50
+        if top:
+            self.rect.y -= 50
+        if bottom:
+            self.rect.y += 50
+        if left:
+            self.rect.x -= 50
+        if right:
+            self.rect.x += 50
 
 
-player1, level_x, level_y = generate_level(load_level(input('Введите название уровня\n')))
+player1, level_x, level_y = generate_level(load_level('lvl.txt'))
 pygame.init()
-size = width, height = 1200, 900
+size = width, height = 600, 300
 screen = pygame.display.set_mode(size)
 clock = pygame.time.Clock()
-running, fps = True, 30
+running, fps, step, pos = True, 30, 50, (290, 280)
 top = bottom = left = right = False
 
 while running:
@@ -181,13 +168,12 @@ while running:
             right = False
         if event.type == pygame.KEYUP and event.key == pygame.K_UP:
             top = False
+    player1.render(top, bottom, left, right)
     screen.fill((0, 0, 0))
     all_sprites.update()
     all_sprites.draw(screen)
-    player_group.draw(screen)
     pygame.display.update()
-    player1.render(top, bottom, left, right)
-    top = bottom = left = right = False
+
     clock.tick(fps)
 pygame.quit()
 
